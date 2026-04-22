@@ -5,6 +5,7 @@ import { AppContext, initialInvoiceData } from "../context/AppContext.jsx";
 import { getAllInvoices } from "../service/invoiceService.js";
 import toast from "react-hot-toast";
 import { useAuth } from "@clerk/clerk-react";
+import { formatDate } from "../utils/formatInvoiceData.js";
 
 function Dashboard() {
   const [invoices, setInvoices] = useState([]);

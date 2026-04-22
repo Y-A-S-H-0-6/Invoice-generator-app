@@ -44,7 +44,7 @@ const PreviewPage = () => {
       setDownloading(true);
       await generatePdfFromElement(
         previewRef.current,
-        `invoice_${Date.now()}.pdf`
+        `invoice_${Date.now()}.pdf`,
       );
     } catch (error) {
       toast.error("Failed to download PDF.");
@@ -94,20 +94,18 @@ const PreviewPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!invoiceData.id) return toast.error("No invoice ID found.");
+    if (!invoiceData._id) return toast.error("No invoice ID found.");
 
     try {
       const token = await getToken();
-      const res = await deleteInvoice(baseURL, invoiceData.id, token);
+      const res = await deleteInvoice(baseURL, invoiceData._id, token);
+
       if (res.status === 204) {
         toast.success("Invoice deleted.");
         navigate("/dashboard");
-      } else {
-        toast.error("Unable to delete invoice.");
       }
     } catch (err) {
       toast.error("Delete failed.");
-      console.error(err);
     }
   };
 
@@ -123,13 +121,17 @@ const PreviewPage = () => {
       const pdfBlob = await generatePdfFromElement(
         previewRef.current,
         `invoice_${Date.now()}.pdf`,
-        true
-      ); // add `returnBlob=true` in your utils
+        true,
+      ); 
 
-      const formData = new FormData();
-      formData.append("file", pdfBlob, `invoice_${Date.now()}.pdf`);
+          const formData = new FormData();
+
+      const file = new File([pdfBlob], `invoice_${Date.now()}.pdf`, {
+        type: "application/pdf",
+      });
+
+      formData.append("file", file);
       formData.append("email", customerEmail);
-
       const token = await getToken();
 
       const response = await sendInvoice(baseURL, token, formData);

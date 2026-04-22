@@ -1,30 +1,28 @@
 import axios from "axios";
 
 export const uploadInvoiceThumbnail = async (base64Image) => {
-  if (!base64Image) {
-    throw new Error("No image provided for Cloudinary upload");
-  }
+  if (!base64Image) throw new Error("No image provided");
 
-  // Convert base64 string to a Blob
-  const res = await fetch(base64Image);
-  const blob = await res.blob();
-
-  const formData = new FormData();
-  formData.append("file", blob, `invoice_${Date.now()}.png`);
-  formData.append("upload_preset", "addupload");
+  console.log("Uploading:", base64Image.substring(0, 50));
 
   try {
     const response = await axios.post(
-      "https://api.cloudinary.com/v1_1/dhadf5h7j/image/upload",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
+      "https://api.cloudinary.com/v1_1/dndae9cjq/image/upload",
+      {
+        file: base64Image,
+        upload_preset: "addupload",
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
-    return response.data.secure_url; // URL of uploaded image
+
+    return response.data.secure_url;
   } catch (error) {
-    console.error(
-      "Cloudinary Upload Error:",
-      error.response?.data || error
-    );
-    throw error;
-  }
+  console.log("FULL CLOUDINARY ERROR:");
+  console.log(JSON.stringify(error.response?.data, null, 2));
+  throw error;
+}
 };

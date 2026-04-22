@@ -61,33 +61,51 @@ router.delete("/:id", requireAuth(), async (req, res) => {
 });
 
 // Send Invoice (email)
-router.post("/sendinvoice", requireAuth(), upload.single("file"), async (req, res) => {
-  try {
-    const { email } = req.body;
-    if (!email || !req.file) return res.status(400).json({ error: "Missing data" });
+router.post(
+  "/sendinvoice",
+  requireAuth(),
+  upload.single("file"),
+  async (req, res) => {
+    try {
+      const { email } = req.body;
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST || "smtp.gmail.com",
-      port: process.env.EMAIL_PORT || 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+      console.log("EMAIL:", email);
+      console.log("FILE:", req.file);
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
-      to: email,
-      subject: "Invoice from your app",
-      text: "Please find attached invoice.",
-      attachments: [{ filename: req.file.originalname || "invoice.pdf", content: req.file.buffer }],
-    });
+      if (!email || !req.file) {
+        return res.status(400).json({ error: "Missing data" });
+      }
 
-    res.status(200).json({ message: "Email sent" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to send email" });
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Invoice from app",
+        text: "Please find attached invoice.",
+        attachments: [
+          {
+            filename: "invoice.pdf",
+            content: req.file.buffer,
+            contentType: "application/pdf",
+          },
+        ],
+      });
+
+      res.json({ message: "Email sent" });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: "Failed to send email" });
+    }
   }
-});
+);
 
 export default router;
